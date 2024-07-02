@@ -1,0 +1,146 @@
+    .ORIG x0200
+    
+    ;
+    LD  R1,OPERATION-NUMBER
+    STI R1,KBSR
+    ;   Enable the KBSR to interrupt
+    
+    LD  R1,INTERRUPTION-ADDRESS
+    STI R1,INTV
+    ;   Put the start address of interrupttion in the interruption vector table
+    
+    LD R6, OS_SP
+    LD R0, USER_PSR
+    ADD R6, R6, #-1
+    STR R0, R6, #0
+    LD R0, USER_PC
+    ADD R6, R6, #-1
+    STR R0, R6, #0
+    RTI
+OS_SP      .FILL x3000
+USER_PSR   .FILL x8002
+USER_PC    .FILL x3000
+KBSR       .FILL XFE00
+OPERATION-NUMBER     .FILL X4000
+INTERRUPTION-ADDRESS .FILL X1000
+INTV       .FILL X0180
+    .END
+
+
+    .ORIG X1000
+    ST R0,SAVER3
+    
+    LD  R5,OPNUMBER2
+    LDI R0,KBDR
+    STI R0,SAVER4
+    ADD R5,R0,R5
+    BRN INPUTNUMBER
+    ;                       JUDGE NUMBER OR LETTER?
+    STI  R0,LETTER-REPLACE; STORE THE LETTER 
+    BRNZP OVER
+    ;                      
+INPUTNUMBER LD R5,OPNUMBER3;R5=-48
+    ADD R5,R5,R0           ;THE OFFSET FROM 0
+    ADD R1,R1,R5           ;PRODUCT THE NEW R1
+    LD  R5,OPNUMBER4       ;R5=-17
+    ADD R5,R1,R5           ;R5=R1-17
+    BRNZ OVER
+    NOT R5,R5
+    ADD R5,R5,#1           ;R5=17-R1
+    ADD R1,R1,R5
+    BRNZP OVER             ;IF R1>17,THEN R1 = 17
+    
+    LD R0,SAVER3
+
+OVER    RTI 
+    
+OPNUMBER2  .FILL #-60
+OPNUMBER3  .FILL #-48
+OPNUMBER4  .FILL #-17
+KBDR       .FILL XFE02
+SAVER3 .BLKW #1
+SAVER4 .FILL X7000
+LETTER-REPLACE .FILL X6000
+    .END 
+    
+
+
+
+
+
+
+
+
+
+    
+    .ORIG X3000
+    LD R3,OPNUMBER1;R3=17
+    AND R1,R1,#0
+    ADD R1,R1,#10;R1=THE NUMBER OF DOTS BEFORE THE FLAPPYBIRD
+    LD  R4,ASCII-OF-A
+    STI  R4,ASCII-OF-LETTER;     THE FIRST BIRD IS CONDUCTED BY 'a'
+    
+NEWLINE    LD R6,SAVER7
+    STI R6,SAVER5
+    NOT R2,R1
+    ADD R2,R2,#1 ;R2=-R1
+    ADD R2,R2,R3; R2=THE NUMBER OF DOTS AFTER THE FLAPPYBIRD
+    ST  R1,SAVER2
+    ;
+    
+LOOP1   LD R0,ASCII-OF-DOT
+    ADD R1,R1,#-1
+    BRN PRINTBIRD
+    OUT
+    BRNZP LOOP1
+    ;                              PRINT THE DOTS IN THE FRONT
+PRINTBIRD   LDI R0,ASCII-OF-LETTER
+    ADD R1,R1,#4  ;R1=3
+LOOP2    OUT
+    ADD R1,R1,#-1
+    BRP LOOP2
+    ;                              PRINT THE BIRD
+    LD R0,ASCII-OF-DOT
+LOOP3   ADD R2,R2,#0
+    BRZ LINEBREAK
+    OUT 
+    ADD R2,R2,#-1
+    BRP LOOP3
+    ;                              PRINT THE DOTS BEHIND
+LINEBREAK    LD R0,ASCII-OF-LINEBREAK
+    OUT            
+    ;               LINE BREAK
+    LD R1,SAVER2;                  LD BACK THE NUMBER OF DOTS IN THE FRONT
+    JSR DELAY
+    ;                     TIME DELAY BEFORE STARTING THE NEWLINE
+    LD  R6,SAVER6
+    LDI R7,SAVER5
+    ADD R7,R7,R6
+    BRN NEWLINE
+    ADD R1,R1,#-1
+    BRZP   NEWLINE
+    ADD R1,R1,#1
+    BRNZP NEWLINE
+    ;                              ALWAYS RUNNING THE PROGRAM
+DELAY ST R6, SAVER1
+      LD R6, COUNT
+LOOP  ADD R6, R6, #-1
+      BRnp LOOP
+      LD R6, SAVER1
+      RET                        
+      ;TIME DELAY SUBOURTINE
+
+    
+SAVER1 .BLKW #1
+SAVER2 .BLKW #1
+SAVER5 .FILL X7000
+SAVER6 .FILL #-60
+SAVER7 .FILL #60
+OPNUMBER1 .FILL #17
+COUNT  .FILL x8000
+ASCII-OF-LETTER   .FILL X6000
+ASCII-OF-A .FILL #97
+ASCII-OF-DOT .FILL #46
+ASCII-OF-LINEBREAK .FILL #10
+
+    .END

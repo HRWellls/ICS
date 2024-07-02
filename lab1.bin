@@ -1,0 +1,24 @@
+0011 0000 0000 0000
+0010 000 011111111;pc=3001,R0=the tested number X
+0101 001 001 1 00000;pc=3002,note R1 as the longest length of secutive 1 in X ,R1=0
+0101 010 010 1 00000;pc=3000,R2=0
+0101 011 011 1 00000;pc=3003,note R3 as the length of the part of X which has been tested from back,R3=0
+0101 100 100 1 00000;pc=3004,note R4 as the tool number,R4=0;
+0001 100 100 1 00001;pc=3005,R4=x0001
+0101 101 101 1 00000;pc=3006,R5=0
+0001 101 101 1 10001;pc=3007,R5=-15                                                                           //
+0001 110 011 0 00 101;pc=3008,R3+R5->R6;zzzzzzzzzzwwwwwwwwwww                address=x3007
+0000 001 000001100;pc=3009,if R3>13 then jump to halt ???????xxxxxxx                         ###pc+12=halt
+0001 011 011 1 00001;pc=300A,else R3+=1;
+0101 110 000 0 00 100;pc=300B,R0 and R4 ->R6
+0000 010 000000110;pc=300C,if the number is 0,then R1=0,start the circuit again;???????+++++++++++   ###pc+6=next
+0001 001 001 1 00001;pc=300D,if the number is 1 then R1+=1;
+0001 100 100 0 00 100;pc=300E,R4*=2;
+0001 110 001 1 11101;pc=300F,R1-3->R6 
+0000 100 111110111;pc=3010,if R1<3 then continue to examine the next number ????????wwwwwwwwww   ###pc-9=next
+0001 010 010 1 00001;pc=3011,R2=1;
+0000 111 000000011;pc=3012,Jump to halt; ?????????yyyyyyyyy                                                     //
+0101 001 001 1 00000;pc=3013,if the number isn't 1,then R1=0,start the circuit again;++++++++++++  address=x3012
+0001 100 100 0 00 100;pc=3014,R4*=2;
+0000 111 111110010;pc=3015,jump to start of the circuit again??????????zzzzzzzzzzzz    ###pc-14=next                         //
+1111 0000 0010 0101;pc=3016,xxxxxxyyyyyyyy    address=x3015
